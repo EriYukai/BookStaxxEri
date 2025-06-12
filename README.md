@@ -1,4 +1,4 @@
-# 📚 BookStaxx - Smart Bookmark Manager
+# 📚 BookStaxx - Smart Bookmark Manager 
 
 ![BookStaxx Screenshot](screenshots/스크린샷,%202025-06-09%2016-03-16.png)
 
