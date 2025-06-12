@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="auto">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="BookStaxx 확장 프로그램의 커스텀 북마크 레이아웃 편집기">
+    <meta name="theme-color" content="#007AFF">
+    <meta name="author" content="BookStaxx">
+    <meta name="application-name" content="BookStaxx Layout Editor">
+    <meta name="keywords" content="북마크, 레이아웃, 커스터마이징, 확장 프로그램, 크롬 확장">
+    <title data-i18n="customLayoutEditorTitle">커스텀 레이아웃 편집기</title>
+    <link href="dist/output.css" rel="stylesheet"> <!-- Tailwind CSS -->
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #1e1e1e; /* 어두운 배경 */
+            color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: auto; /* 가로 스크롤 허용 */
+            overflow-y: auto; /* 세로 스크롤 허용 */
+        }
+        .editor-container {
+            width: 100vw;
+            height: calc(100vh - 120px);
+            background-color: #2a2a2e;
+            position: relative; /* 자식 요소의 absolute positioning 기준 */
+            overflow: auto; /* 스크롤바 표시 */
+        }
+        
+        .layout-area {
+            position: relative;
+            margin: 0;
+            /* 크기는 JavaScript에서 동적으로 설정됩니다 */
+        }
+        .layout-item {
+            width: 40px; /* 원 크기 */
+            height: 40px;
+            background-color: #007AFF; /* iOS 블루 */
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            position: absolute; /* 드래그를 위해 absolute 사용 */
+            cursor: grab;
+            user-select: none; /* 텍스트 선택 방지 */
+            border: 2px solid #0056b3;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+        }
+        .layout-item:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            background-color: #0069d9;
+            z-index: 10;
+        }
+        .layout-item:active {
+            cursor: grabbing;
+            background-color: #0056b3;
+            z-index: 1000; /* 드래그 중 최상단 */
+            transform: scale(1.15);
+        }
+        .controls {
+            margin: 10px 0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding-bottom: 20px; /* 하단 여백 추가 */
+        }
+        .controls button {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            background-color: #007AFF;
+            color: white;
+            transition: background-color 0.2s, transform 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .controls button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        .controls button:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .controls button.reset {
+            background-color: #555;
+        }
+        .controls button.reset:hover {
+            background-color: #777;
+        }
+        .description {
+            margin: 10px auto;
+            text-align: center;
+            max-width: 800px;
+            color: #aaa;
+            font-size: 12px;
+            line-height: 1.4;
+            padding: 0 10px;
+        }
+        .key-instruction {
+            margin-top: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 8px 12px;
+            display: inline-block;
+            font-size: 12px;
+        }
+        .key-instruction strong {
+            color: #fff;
+            font-weight: bold;
+        }
+        
+        /* 접근성을 위한 포커스 표시 개선 */
+        button:focus, .layout-item:focus {
+            outline: 2px solid #4285f4;
+            outline-offset: 2px;
+        }
+        /* 화면 리더를 위한 숨겨진 설명 */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1 data-i18n="customLayoutEditorHeader" style="font-size: 1.5rem; margin: 10px 0;">커스텀 북마크 레이아웃 편집</h1>
+    
+    <p class="description" data-i18n="customLayoutDescription">
+        원하는 위치로 북마크 아이콘을 드래그하여 배치하세요. 각 아이콘은 북마크 표시 순서를 나타냅니다.
+        레이아웃을 저장하면 북마크 표시 시 이 배치가 적용됩니다.
+    </p>
+    
+    <div class="key-instruction">
+        <strong data-i18n="customLayoutTip">💡 팁: 북마크 위치를 자유롭게 조정한 후 반드시 레이아웃 저장 버튼을 클릭하세요. 변경 사항이 저장되지 않으면 적용되지 않습니다.</strong>
+    </div>
+    
+    <div class="editor-container" role="application" aria-label="북마크 레이아웃 편집 영역">
+        <div class="layout-area" id="editorContainer">
+            <!-- 1-100번 아이템이 JS로 여기에 추가됩니다 -->
+            <span class="sr-only">이 영역에서 아이콘을 드래그하여 원하는 위치에 배치할 수 있습니다. 각 아이콘은 북마크 표시 순서를 나타냅니다.</span>
+        </div>
+    </div>
+    
+    <div class="controls" role="group" aria-label="레이아웃 저장 및 초기화 버튼">
+        <button id="saveLayoutButton" data-i18n="saveLayoutButton" aria-label="현재 레이아웃 저장하기">레이아웃 저장</button>
+        <button id="resetLayoutButton" class="reset" data-i18n="resetLayoutButton" aria-label="모든 아이콘 위치 초기화하기">위치 초기화</button>
+    </div>
+
+    <script src="custom-layout.js"></script>
+</body>
+</html> 
