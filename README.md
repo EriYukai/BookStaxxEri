@@ -1,7 +1,9 @@
 # 📚 BookStaxx - Smart Bookmark Manager 
 
 ![BookStaxx Screenshot](screenshots/스크린샷,%202025-06-09%2016-03-16.png)
+
 chrome: https://chromewebstore.google.com/detail/bookstaxx/jjfaipdofninepfgonhihoomfebabgbk
+
 firefox: https://addons.mozilla.org/ko/firefox/addon/bookstaxx/
 
 🌟 Transform Your Web Browsing with BookStaxx!
